@@ -61,7 +61,7 @@ public class UserService {
           // as the user was already found, the username matches
           return existingUser.get();
       } else {
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("The provided username does not exist or password does not match"));
+          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("The provided username does not exist or password does not match"));
       }
   }
 
@@ -77,9 +77,9 @@ public class UserService {
    */
   private void checkIfUserExists(User userToBeCreated) {
     Optional<User> userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
-    String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
+    String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created! Thus the username aleady exists";
     if (userByUsername.isPresent()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "username", "is"));
+      throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(baseErrorMessage, "username", "is"));
     }
   }
 }
