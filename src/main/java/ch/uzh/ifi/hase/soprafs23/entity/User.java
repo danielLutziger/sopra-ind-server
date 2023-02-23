@@ -35,11 +35,11 @@ public class User implements Serializable {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Date birthday;
 
     @Column(nullable = false)
-    private Date creation;
+    private Date creationDate;
 
     @Column(nullable = false, unique = true)
     private String token;
@@ -103,11 +103,11 @@ public class User implements Serializable {
         this.birthday = birthday;
     }
 
-    public Date getCreation() {
-        return creation;
+    public Date getCreationDate() {
+        return creationDate;
     }
 
-    public void setCreation(Date creation) {
-        this.creation = creation;
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
     }
 }
