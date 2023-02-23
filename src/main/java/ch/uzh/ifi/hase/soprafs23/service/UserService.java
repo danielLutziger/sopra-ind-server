@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -54,6 +55,16 @@ public class UserService {
     return newUser;
   }
 
+  public User getLoginUser(User u){
+      Optional<User> existingUser = userRepository.findByUsername(u.getUsername());
+      if (existingUser.isPresent() && existingUser.get().getPassword().equals(u.getPassword())) {
+          // as the user was already found, the username matches
+          return existingUser.get();
+      } else {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("The provided username does not exist or password does not match"));
+      }
+  }
+
   /**
    * This is a helper method that will check the uniqueness criteria of the
    * username and the name
@@ -65,17 +76,10 @@ public class UserService {
    * @see User
    */
   private void checkIfUserExists(User userToBeCreated) {
-    User userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
-    User userByName = userRepository.findByName(userToBeCreated.getName());
-
+    Optional<User> userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
     String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
-    if (userByUsername != null && userByName != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          String.format(baseErrorMessage, "username and the name", "are"));
-    } else if (userByUsername != null) {
+    if (userByUsername.isPresent()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "username", "is"));
-    } else if (userByName != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "name", "is"));
     }
   }
 }
