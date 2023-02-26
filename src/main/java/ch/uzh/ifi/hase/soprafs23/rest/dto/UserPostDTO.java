@@ -1,10 +1,13 @@
 package ch.uzh.ifi.hase.soprafs23.rest.dto;
 
+import javax.validation.constraints.NotBlank;
 import java.util.Date;
 
 public class UserPostDTO {
 
+    @NotBlank
     private String username;
+    @NotBlank
     private String password;
     private Date birthday;
 
