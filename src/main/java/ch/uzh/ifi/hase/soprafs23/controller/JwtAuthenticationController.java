@@ -44,8 +44,8 @@ public class JwtAuthenticationController {
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
         final String token = jwtUtil.generateToken(userDetails);
-
-        return ResponseEntity.ok(new JwtResponse(token));
+        User u = userService.getByUsername(authenticationRequest.getUsername());
+        return ResponseEntity.ok(new JwtResponse(u.getId(), token));
     }
 
     @PostMapping("/registration")
@@ -57,6 +57,6 @@ public class JwtAuthenticationController {
         // create user
         User createdUser = userService.createUser(userInput);
         // convert internal representation of user back to API
-        return ResponseEntity.created(new URI("/users")).body(new JwtResponse(createdUser.getToken()));
+        return ResponseEntity.created(new URI("/users")).body(new JwtResponse(createdUser.getId(), createdUser.getToken()));
     }
 }

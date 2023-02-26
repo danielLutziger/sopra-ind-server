@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs23.service;
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.security.jtw.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,17 @@ public class UserService {
             return selectedUser.get();
         }
         else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User does not exist"));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not exist");
+        }
+    }
+
+    public User getByUsername(String username){
+        Optional<User> selectedUser = userRepository.findByUsername(username);
+        if (selectedUser.isPresent()) {
+            return selectedUser.get();
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not exist");
         }
     }
 
@@ -65,6 +76,15 @@ public class UserService {
 
         log.debug("Created Information for User: {}", newUser);
         return newUser;
+    }
+
+    public User updateUser(User current, UserPostDTO updates){
+        current.setUsername(updates.getUsername());
+        current.setBirthday(updates.getBirthday());
+        current.setToken(jwtUtil.generateToken(current));
+        current = userRepository.save(current);
+        userRepository.flush();
+        return current;
     }
 
     public User getLoginUser(User u) {
