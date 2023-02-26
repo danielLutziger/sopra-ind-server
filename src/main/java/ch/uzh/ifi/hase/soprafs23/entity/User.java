@@ -40,7 +40,7 @@ public class User implements Serializable {
     @Column(nullable = false)
     private Date creationDate;
 
-    @Column(nullable = false, unique = true, length = 1000)
+    @Column(nullable = false, unique = true)
     private String token;
 
     @Column(nullable = false)
