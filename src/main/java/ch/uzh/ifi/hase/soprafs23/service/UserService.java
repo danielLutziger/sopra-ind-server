@@ -50,7 +50,7 @@ public class UserService {
             return selectedUser.get();
         }
         else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not exist");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + id +" does not exist");
         }
     }
 
@@ -60,7 +60,7 @@ public class UserService {
             return selectedUser.get();
         }
         else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not exist");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with username "+ username+ " does not exist");
         }
     }
 
