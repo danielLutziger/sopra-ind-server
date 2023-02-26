@@ -16,6 +16,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+
 @RestController
 public class JwtAuthenticationController {
 
@@ -55,8 +57,6 @@ public class JwtAuthenticationController {
         // create user
         User createdUser = userService.createUser(userInput);
         // convert internal representation of user back to API
-        //return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
-
-        return ResponseEntity.ok(new JwtResponse(createdUser.getToken()));
+        return ResponseEntity.created(new URI("/users")).body(new JwtResponse(createdUser.getToken()));
     }
 }
