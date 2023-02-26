@@ -66,7 +66,7 @@ public class UserService {
 
     public User createUser(User newUser) {
         newUser.setToken(jwtUtil.generateToken(newUser));
-        newUser.setStatus(UserStatus.OFFLINE);
+        newUser.setStatus(UserStatus.ONLINE);
         checkIfUserExists(newUser);
         newUser.setCreationDate(new Date());
         BCryptPasswordEncoder b = new BCryptPasswordEncoder();
@@ -82,28 +82,21 @@ public class UserService {
         current.setUsername(updates.getUsername());
         current.setBirthday(updates.getBirthday());
         current.setToken(jwtUtil.generateToken(current));
-        current = userRepository.save(current);
-        userRepository.flush();
-        return current;
-    }
-
-    public User getLoginUser(User u) {
-        Optional<User> existingUser = userRepository.findByUsername(u.getUsername());
-        if (existingUser.isPresent() && existingUser.get().getPassword().equals(u.getPassword())) {
-            //update user status to online
-            //TODO: set user as online
-            // as the user was already found, the username matches
-            return existingUser.get();
-        }
-        else {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("The provided username does not exist or password does not match"));
+        try {
+            current = userRepository.save(current);
+            userRepository.flush();
+            return current;
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "A user with this username already exists!");
         }
     }
 
     public User getLogoutUser(User u){
         Optional<User> existingUser = userRepository.findByUsername(u.getUsername());
-        //TODO: update uesr to offline
-        return existingUser.get();
+        existingUser.get().setStatus(UserStatus.OFFLINE);
+        u = userRepository.save(existingUser.get());
+        userRepository.flush();
+        return u;
     }
 
     /**

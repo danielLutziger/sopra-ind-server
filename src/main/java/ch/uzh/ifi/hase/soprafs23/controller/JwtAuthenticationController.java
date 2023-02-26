@@ -15,7 +15,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 
 @RestController
@@ -46,6 +48,14 @@ public class JwtAuthenticationController {
         final String token = jwtUtil.generateToken(userDetails);
         User u = userService.getByUsername(authenticationRequest.getUsername());
         return ResponseEntity.ok(new JwtResponse(u.getId(), token));
+    }
+    @PostMapping("/signout")
+    public ResponseEntity<?> logoutUser(@RequestBody String id) throws AuthenticationException {
+        try{userService.getLogoutUser(userService.getById(Long.valueOf(id)));}
+        catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your userid got manipulated!");
+        }
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/registration")
