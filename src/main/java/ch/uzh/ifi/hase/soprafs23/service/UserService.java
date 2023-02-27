@@ -78,7 +78,7 @@ public class UserService {
         return newUser;
     }
 
-    public User updateUser(User current, UserPutDTO updates){
+    public User updateUser(User current, User updates){
         current.setUsername(updates.getUsername());
         current.setBirthday(updates.getBirthday());
         current.setToken(jwtUtil.generateToken(current));

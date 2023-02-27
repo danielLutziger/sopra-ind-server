@@ -69,7 +69,8 @@ public class UserController {
     @PutMapping("/users/{id}")
     public ResponseEntity<?> updateUserById(@PathVariable Long id, @RequestBody UserPutDTO userPutDTO) {
         User currentUser = userService.getById(id);
-        currentUser = userService.updateUser(currentUser, userPutDTO);
+        User userUpdates = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
+        currentUser = userService.updateUser(currentUser, userUpdates);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Access-Control-Expose-Headers", "Access-Token, Uid");
         headers.add("Access-Token", currentUser.getToken());
