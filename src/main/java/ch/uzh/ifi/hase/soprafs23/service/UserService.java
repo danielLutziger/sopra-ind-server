@@ -3,7 +3,7 @@ package ch.uzh.ifi.hase.soprafs23.service;
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.security.jtw.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +78,7 @@ public class UserService {
         return newUser;
     }
 
-    public User updateUser(User current, UserPostDTO updates){
+    public User updateUser(User current, UserPutDTO updates){
         current.setUsername(updates.getUsername());
         current.setBirthday(updates.getBirthday());
         current.setToken(jwtUtil.generateToken(current));

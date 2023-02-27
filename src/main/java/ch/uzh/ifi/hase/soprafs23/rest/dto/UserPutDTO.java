@@ -1,14 +1,12 @@
 package ch.uzh.ifi.hase.soprafs23.rest.dto;
 
 import javax.validation.constraints.NotBlank;
+import java.util.Date;
 
-public class UserPostDTO {
-
+public class UserPutDTO {
     @NotBlank
     private String username;
-    @NotBlank
-    private String password;
-
+    private Date birthday;
 
     public String getUsername() {
         return username;
@@ -18,11 +16,11 @@ public class UserPostDTO {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
+    public Date getBirthday() {
+        return birthday;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
     }
 }

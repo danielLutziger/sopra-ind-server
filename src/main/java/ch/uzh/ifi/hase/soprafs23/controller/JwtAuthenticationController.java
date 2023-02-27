@@ -63,7 +63,6 @@ public class JwtAuthenticationController {
     public ResponseEntity<?> registerUser(@RequestBody UserPostDTO userPostDTO) throws Exception {
         // convert API user to internal representation
         User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
-
         // create user
         User createdUser = userService.createUser(userInput);
         // convert internal representation of user back to API
