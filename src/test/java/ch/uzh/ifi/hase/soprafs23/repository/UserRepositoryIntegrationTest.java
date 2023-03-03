@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
+import java.util.Date;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -24,6 +26,8 @@ public class UserRepositoryIntegrationTest {
     // given
     User user = new User();
     user.setUsername("firstname@lastname");
+    user.setPassword("asdf");
+    user.setCreationDate(new Date());
     user.setStatus(UserStatus.OFFLINE);
     user.setToken("1");
 

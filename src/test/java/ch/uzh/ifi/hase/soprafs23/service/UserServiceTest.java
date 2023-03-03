@@ -3,14 +3,18 @@ package ch.uzh.ifi.hase.soprafs23.service;
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs23.security.jtw.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.lang.reflect.Method;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,8 +24,12 @@ public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private JwtUtil jwtUtil;
+
     @InjectMocks
     private UserService userService;
+
 
     private User testUser;
     private Optional<User> testU;
@@ -34,12 +42,17 @@ public class UserServiceTest {
         testUser = new User();
         testUser.setId(1L);
         testUser.setUsername("testUsername");
+        testUser.setPassword("testUsername");
 
         testU = Optional.ofNullable(testUser);
 
         // when -> any object is being save in the userRepository -> return the dummy
         // testUser
+        MockitoAnnotations.openMocks(this);
         Mockito.when(userRepository.save(Mockito.any())).thenReturn(testUser);
+        Mockito.when(jwtUtil.generateToken((User) Mockito.any())).thenReturn("12345");
+        Mockito.when(jwtUtil.generateToken((UserDetails) Mockito.any())).thenReturn("12345");
+        userService  = new UserService(userRepository, jwtUtil);
     }
 
     @Test
@@ -54,7 +67,7 @@ public class UserServiceTest {
         assertEquals(testUser.getId(), createdUser.getId());
         assertEquals(testUser.getUsername(), createdUser.getUsername());
         assertNotNull(createdUser.getToken());
-        assertEquals(UserStatus.OFFLINE, createdUser.getStatus());
+        assertEquals(UserStatus.ONLINE, createdUser.getStatus());
     }
 
     @Test
