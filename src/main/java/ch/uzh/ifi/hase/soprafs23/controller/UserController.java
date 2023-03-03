@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import org.springframework.http.HttpHeaders;
@@ -66,9 +67,10 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}")
-    public ResponseEntity<?> updateUserById(@PathVariable Long id, @RequestBody UserPostDTO userPostDTO) {
+    public ResponseEntity<?> updateUserById(@PathVariable Long id, @RequestBody UserPutDTO userPutDTO) {
         User currentUser = userService.getById(id);
-        currentUser = userService.updateUser(currentUser, userPostDTO);
+        User userUpdates = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
+        currentUser = userService.updateUser(currentUser, userUpdates);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Access-Control-Expose-Headers", "Access-Token, Uid");
         headers.add("Access-Token", currentUser.getToken());
