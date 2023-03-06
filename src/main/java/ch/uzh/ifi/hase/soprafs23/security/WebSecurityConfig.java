@@ -39,7 +39,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http    // enable cors and disable csrf
                 .cors().and().csrf().disable()
                 // Endpoints which should not be targeted by the restrictions
-                .authorizeRequests().antMatchers("/login", "/h2-console/**").permitAll()
+                .authorizeRequests().antMatchers("/login").permitAll()
                 .antMatchers(HttpMethod.GET, "/users").authenticated()
                 .antMatchers(HttpMethod.POST, "/users").permitAll()
                 // All other requests need to be authenticated
@@ -54,7 +54,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().antMatchers("/swagger-ui.html/**", "/configuration/**", "/swagger-resources/**", "/v2/api-docs/**", "/webjars/**");
+        web.ignoring().antMatchers("/h2-console/**");
     }
 
     @Override
