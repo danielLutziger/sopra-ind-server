@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs23.security.jtw.JwtAuthorizationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -38,7 +39,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http    // enable cors and disable csrf
                 .cors().and().csrf().disable()
                 // Endpoints which should not be targeted by the restrictions
-                .authorizeRequests().antMatchers("/login", "/users", "/h2-console/**").permitAll()
+                .authorizeRequests().antMatchers("/login", "/h2-console/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/users").authenticated()
+                .antMatchers(HttpMethod.POST, "/users").permitAll()
                 // All other requests need to be authenticated
                 .anyRequest().authenticated().and()
                 // Make sure we use stateless session; session won't be used to store user's state.
@@ -50,7 +53,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    public void configure(WebSecurity web) throws Exception {
+    public void configure(WebSecurity web) {
         web.ignoring().antMatchers("/swagger-ui.html/**", "/configuration/**", "/swagger-resources/**", "/v2/api-docs/**", "/webjars/**");
     }
 
