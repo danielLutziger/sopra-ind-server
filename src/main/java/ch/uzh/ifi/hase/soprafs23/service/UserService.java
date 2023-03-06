@@ -79,10 +79,14 @@ public class UserService {
         return newUser;
     }
 
-    public User updateUser(User current, User updates){
-        current.setUsername(updates.getUsername());
-        current.setBirthday(updates.getBirthday());
-        current.setToken(jwtUtil.generateToken(current));
+    public User updateUser(User current, User updates, HttpServletRequest request){
+        if (editAccess(current, request)){
+            current.setUsername(updates.getUsername());
+            current.setBirthday(updates.getBirthday());
+            current.setToken(jwtUtil.generateToken(current));
+        } else {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized to change the username on behalf of another user!");
+        }
         try {
             current = userRepository.save(current);
             userRepository.flush();
@@ -128,5 +132,10 @@ public class UserService {
         if (userByUsername.isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(baseErrorMessage, "username", "is"));
         }
+    }
+
+    public boolean editAccess(User currentUser, HttpServletRequest request) {
+        String username = jwtUtil.extractUsername(request.getHeader("Authorization").substring(7));
+        return username.equals(currentUser.getUsername());
     }
 }

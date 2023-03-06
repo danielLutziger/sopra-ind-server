@@ -6,10 +6,13 @@ import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
+import org.mapstruct.Context;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,24 +65,25 @@ public class UserController {
     @GetMapping("/users/{id}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+    public ResponseEntity<?> getUserById(@PathVariable Long id, @Context HttpServletRequest request) {
         // create user
         User currentUser = userService.getById(id);
         // convert internal representation of user back to API
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Access-Control-Expose-Headers", "Access-Token, Uid");
-        headers.add("Access-Token", currentUser.getToken());
+        headers.add("Access-Control-Expose-Headers", "Edit-Access, Uid");
+        headers.add("Edit-Access", String.valueOf(userService.editAccess(currentUser, request)));
         return ResponseEntity.status(HttpStatus.OK).headers(headers).body(DTOMapper.INSTANCE.convertEntityToUserGetDTO(currentUser));
     }
 
     @PutMapping("/users/{id}")
-    public ResponseEntity<?> updateUserById(@PathVariable Long id, @RequestBody UserPutDTO userPutDTO) {
+    public ResponseEntity<?> updateUserById(@PathVariable Long id, @RequestBody UserPutDTO userPutDTO, @Context HttpServletRequest request) {
         User currentUser = userService.getById(id);
         User userUpdates = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
-        currentUser = userService.updateUser(currentUser, userUpdates);
+        currentUser = userService.updateUser(currentUser, userUpdates, request);
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Access-Control-Expose-Headers", "Access-Token, Uid");
+        headers.add("Access-Control-Expose-Headers", "Access-Token, Edit-Access, Uid");
         headers.add("Access-Token", currentUser.getToken());
+        headers.add("Edit-Access", "true"); // value can be hardcoded as the check is done in update user
         return ResponseEntity.noContent().headers(headers).build();
     }
 }

@@ -205,7 +205,8 @@ public class UserControllerTest {
         Mockito.when(userRepository.save(Mockito.any())).thenReturn(updatedUser);
 
         Mockito.when(userService.getById(Mockito.any())).thenReturn(user);
-        Mockito.when(userService.updateUser(Mockito.any(), Mockito.any())).thenCallRealMethod();
+        Mockito.when(userService.editAccess(Mockito.any(), Mockito.any())).thenReturn(true);
+        Mockito.when(userService.updateUser(Mockito.any(), Mockito.any(), Mockito.any())).thenCallRealMethod();
 
         // when/then -> do the request + validate the result
         MockHttpServletRequestBuilder putRequest = put("/users/1")
