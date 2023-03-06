@@ -46,23 +46,30 @@ public class UserController {
     @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public UserGetDTO createUser(@RequestBody UserPostDTO userPostDTO) {
+    public ResponseEntity<?> createUser(@RequestBody UserPostDTO userPostDTO) {
         // convert API user to internal representation
         User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
         // create user
         User createdUser = userService.createUser(userInput);
+        // add headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Access-Control-Expose-Headers", "Access-Token, Uid");
+        headers.add("Access-Token", createdUser.getToken());
         // convert internal representation of user back to API
-        return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
+        return ResponseEntity.status(HttpStatus.CREATED).headers(headers).body(DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser));
     }
 
     @GetMapping("/users/{id}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public UserGetDTO getUserById(@PathVariable Long id) {
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
         // create user
-        User createdUser = userService.getById(id);
+        User currentUser = userService.getById(id);
         // convert internal representation of user back to API
-        return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Access-Control-Expose-Headers", "Access-Token, Uid");
+        headers.add("Access-Token", currentUser.getToken());
+        return ResponseEntity.status(HttpStatus.OK).headers(headers).body(DTOMapper.INSTANCE.convertEntityToUserGetDTO(currentUser));
     }
 
     @PutMapping("/users/{id}")

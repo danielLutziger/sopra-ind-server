@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -39,7 +38,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http    // enable cors and disable csrf
                 .cors().and().csrf().disable()
                 // Endpoints which should not be targeted by the restrictions
-                .authorizeRequests().antMatchers("/login", "/registration", "/authenticate", "/h2-console/**").permitAll()
+                .authorizeRequests().antMatchers("/login", "/users", "/h2-console/**").permitAll()
                 // All other requests need to be authenticated
                 .anyRequest().authenticated().and()
                 // Make sure we use stateless session; session won't be used to store user's state.

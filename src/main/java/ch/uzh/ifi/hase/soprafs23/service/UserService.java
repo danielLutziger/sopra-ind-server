@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -91,9 +92,21 @@ public class UserService {
         }
     }
 
-    public User getLogoutUser(User u){
-        Optional<User> existingUser = userRepository.findByUsername(u.getUsername());
+    public User getLogoutUser(HttpServletRequest request){
+        String username = jwtUtil.extractUsername(request.getHeader("Authorization").substring(7));
+        Optional<User> existingUser = userRepository.findByUsername(username);
         existingUser.get().setStatus(UserStatus.OFFLINE);
+        userRepository.save(existingUser.get());
+        userRepository.flush();
+        return existingUser.get();
+    }
+    public User getLoginUser(User u){
+        //get the user
+        Optional<User> existingUser = userRepository.findByUsername(u.getUsername());
+        // set the status
+        existingUser.get().setStatus(UserStatus.ONLINE);
+        // generate a new token
+        existingUser.get().setToken(jwtUtil.generateToken(existingUser.get()));
         u = userRepository.save(existingUser.get());
         userRepository.flush();
         return u;

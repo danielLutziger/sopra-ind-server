@@ -7,7 +7,9 @@ import ch.uzh.ifi.hase.soprafs23.security.jtw.JwtResponse;
 import ch.uzh.ifi.hase.soprafs23.security.jtw.JwtUtil;
 import ch.uzh.ifi.hase.soprafs23.service.UserDetailsServiceImpl;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
+import org.mapstruct.Context;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.net.URI;
 
 @RestController
@@ -26,12 +29,6 @@ public class JwtAuthenticationController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
-
     private final UserService userService;
 
     public JwtAuthenticationController(UserService userService) {
@@ -39,33 +36,27 @@ public class JwtAuthenticationController {
     }
 
 
-    @PostMapping("/login")
+    @PutMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody UserPostDTO authenticationRequest) throws AuthenticationException {
 
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
-
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
-        final String token = jwtUtil.generateToken(userDetails);
-        User u = userService.getByUsername(authenticationRequest.getUsername());
-        return ResponseEntity.ok(new JwtResponse(u.getId(), token));
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
+        } catch (AuthenticationException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with username "+ authenticationRequest.getUsername()+ " does not exist");
+        }
+        User loginUser = userService.getByUsername(authenticationRequest.getUsername());
+        userService.getLoginUser(loginUser);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Access-Control-Expose-Headers", "Access-Token, Uid");
+        headers.add("Access-Token", loginUser.getToken());
+        return ResponseEntity.status(HttpStatus.OK).headers(headers).body(DTOMapper.INSTANCE.convertEntityToUserGetDTO(loginUser));
     }
-    @PostMapping("/signout")
-    public ResponseEntity<?> logoutUser(@RequestBody String id) throws AuthenticationException {
-        try{userService.getLogoutUser(userService.getById(Long.valueOf(id)));}
+    @PutMapping("/signout")
+    public ResponseEntity<?> logoutUser(@Context HttpServletRequest request) throws AuthenticationException {
+        try{userService.getLogoutUser(request);}
         catch (Exception e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your userid got manipulated!");
         }
         return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/registration")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> registerUser(@RequestBody UserPostDTO userPostDTO) throws Exception {
-        // convert API user to internal representation
-        User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
-        // create user
-        User createdUser = userService.createUser(userInput);
-        // convert internal representation of user back to API
-        return ResponseEntity.created(new URI("/users")).body(new JwtResponse(createdUser.getId(), createdUser.getToken()));
     }
 }
