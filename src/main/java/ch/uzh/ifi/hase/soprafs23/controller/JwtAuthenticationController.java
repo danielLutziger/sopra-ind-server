@@ -36,7 +36,7 @@ public class JwtAuthenticationController {
     }
 
 
-    @PutMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody UserPostDTO authenticationRequest) throws AuthenticationException {
 
         try {
