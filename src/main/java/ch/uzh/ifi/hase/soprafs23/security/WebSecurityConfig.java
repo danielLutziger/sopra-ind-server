@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -20,7 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig implements WebSecurityConfigurer<HttpSecurity> {
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -31,16 +32,15 @@ public class WebSecurityConfig implements WebSecurityConfigurer<HttpSecurity> {
     @Autowired
     private JwtAuthorizationFilter jwtAuthorizationFilter;
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
     }
 
     @Override
-    public void configure(HttpSecurity http) throws Exception {
-        http
-                // enable cors and disable csrf
-                .cors().and().csrf().disable()
+    protected void configure(HttpSecurity http) throws Exception {
+        http    // enable cors and disable csrf
+                .cors(c -> {}).and().csrf(c -> {})
                 // Endpoints which should not be targeted by the restrictions
                 .authorizeRequests().antMatchers("/login").permitAll()
                 .antMatchers(HttpMethod.GET, "/users").authenticated()
@@ -60,14 +60,14 @@ public class WebSecurityConfig implements WebSecurityConfigurer<HttpSecurity> {
         web.ignoring().antMatchers("/h2-console/**");
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
     @Override
     @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
