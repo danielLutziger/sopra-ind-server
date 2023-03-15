@@ -7,12 +7,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurer;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerBuilder;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig implements WebSecurityConfigurerBuilder {
 
     @Autowired
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -32,19 +30,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private JwtAuthorizationFilter jwtAuthorizationFilter;
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    public void configure(HttpSecurity http) throws Exception {
         http    // enable cors and disable csrf
-                .cors(c -> {}).and().csrf(c -> {})
+                .cors().and().csrf().disable()
                 // Endpoints which should not be targeted by the restrictions
-                .authorizeRequests().antMatchers("/login").permitAll()
-                .antMatchers(HttpMethod.GET, "/users").authenticated()
-                .antMatchers(HttpMethod.POST, "/users").permitAll()
+                .authorizeRequests().mvcMatchers("/login").permitAll()
+                .mvcMatchers(HttpMethod.GET, "/users").authenticated()
+                .mvcMatchers(HttpMethod.POST, "/users").permitAll()
                 // All other requests need to be authenticated
                 .anyRequest().authenticated().and()
                 // Make sure we use stateless session; session won't be used to store user's state.
@@ -57,13 +55,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().antMatchers("/h2-console/**");
+        web.ignoring().mvcMatchers("/h2-console/**");
     }
 
     @Override
     @Bean
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
+    public AuthenticationManager authenticationManager() throws Exception {
+        return super.authenticationManager();
     }
 
     @Bean
